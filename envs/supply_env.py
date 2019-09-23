@@ -57,11 +57,6 @@ class SupplyEnv(gym.Env):
 
 
     def _calculate(self):
-        self.history['consumo'] = np.random.randint(0, 
-                                            2000,
-                                            size=(len(self.history.index),)
-                                            )
-
         # Initial Stock
         self.history.at[self.current_date, 'stock'] = 2000
 
@@ -69,6 +64,12 @@ class SupplyEnv(gym.Env):
     def step(self, action):
         #if type(action) is np.ndarray:
         #    print("Entero")
+
+        # Get the consumo
+        self.history.at[self.current_date, 'consumo'] = np.random.randint(0, 
+                                    200,
+                                    size=(1,)
+                                    )
 
         # Save the order
         self.orders.at[self.current_date, 'pedido'] = action[0]
@@ -90,6 +91,9 @@ class SupplyEnv(gym.Env):
         current_stock = self.history.at[self.current_date, 'stock']
         current_consumo = self.history.at[self.current_date, 'consumo']
 
+        # Set current availability
+        self.history.at[self.current_date, 'disponible'] = current_stock + current_transito - current_consumo
+
         # Validate if the environment ends
         done = self.iterator == (len(self.range_date) - 1)
 
@@ -99,8 +103,8 @@ class SupplyEnv(gym.Env):
             self.current_date = self.range_date[self.iterator]
 
             # Set new stock for next day
-            self.history.at[self.current_date, 'stock'] = current_stock - current_consumo
-
+            self.history.at[self.current_date, 'stock'] = current_stock + current_transito - current_consumo
+            
         obs, reward, _ = [None, 0, None]
 
         return obs, reward, done, _

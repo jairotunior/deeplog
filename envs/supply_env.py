@@ -5,6 +5,10 @@ import numpy as np
 from datetime import datetime, timedelta
 from gym.utils import seeding
 
+from envs.render.chart import Chart
+
+import matplotlib.pyplot as plt
+
 
 
 class SupplyEnv(gym.Env):
@@ -23,12 +27,13 @@ class SupplyEnv(gym.Env):
 
         self.orders = pd.DataFrame({'index': self.range_date,
                                     'pedido': np.zeros((len(self.range_date),)),
-                                    'entrega': np.zeros((len(self.range_date),))
+                                    'fecha_entrega': np.zeros((len(self.range_date),)),
+                                    'fecha_vencimiento': np.zeros((len(self.range_date),))
                                     })
         self.orders = self.orders.set_index('index')
 
         self.history = pd.DataFrame({'index': self.range_date,
-                                    'consumo': np.zeros((len(self.range_date),)),
+                                    'demanda': np.zeros((len(self.range_date),)),
                                     'stock': np.zeros((len(self.range_date),)),
                                     'transito': np.zeros((len(self.range_date),)),
                                     'disponible': np.zeros((len(self.range_date),)),
@@ -48,10 +53,12 @@ class SupplyEnv(gym.Env):
         )
         """
 
-        self.action_space = gym.spaces.Box(low=0, high=10000, shape=(1,), dtype=np.int)
+        self.action_space = gym.spaces.Box(low=0, high=2000, shape=(1,), dtype=np.int)
         self.observation_space = gym.spaces.Box(low=0, high=np.inf, shape=(10, 1), dtype=np.int)
 
         self.seed()
+
+        self.chart = None
 
         self._calculate()
 
@@ -62,34 +69,31 @@ class SupplyEnv(gym.Env):
 
 
     def step(self, action):
-        #if type(action) is np.ndarray:
-        #    print("Entero")
-
         # Get the consumo
-        self.history.at[self.current_date, 'consumo'] = np.random.randint(0, 
-                                    200,
+        self.history.at[self.current_date, 'demanda'] = np.random.randint(0,
+                                    1900,
                                     size=(1,)
                                     )
 
         # Save the order
         self.orders.at[self.current_date, 'pedido'] = action[0]
-        self.orders.at[self.current_date, 'entrega'] = self.range_date[self.iterator] + self.lead_time
+        self.orders.at[self.current_date, 'fecha_entrega'] = self.range_date[self.iterator] + self.lead_time
+        self.orders.at[self.current_date, 'fecha_vencimiento'] = self.range_date[self.iterator] + self.lead_time
 
         self.history.at[self.current_date, 'pedido'] = action[0]
 
         # Get incoming orders
-        mask = self.orders['entrega'] == self.current_date
+        mask = self.orders['fecha_entrega'] == self.current_date
         incoming_orders = self.orders.loc[mask]
-        current_transito = 0
+        current_transito = incoming_orders['pedido'].sum()
 
         # If there are incoming orders, proceed to receive
-        if len(incoming_orders.index) > 0:
-            current_transito = incoming_orders['pedido'].sum()
+        if current_transito > 0:
             self.history.at[self.current_date, 'transito'] = current_transito
 
         # Get the current stock and consumo
         current_stock = self.history.at[self.current_date, 'stock']
-        current_consumo = self.history.at[self.current_date, 'consumo']
+        current_consumo = self.history.at[self.current_date, 'demanda']
 
         # Set current availability
         self.history.at[self.current_date, 'disponible'] = current_stock + current_transito - current_consumo
@@ -119,7 +123,10 @@ class SupplyEnv(gym.Env):
         pass
 
     def render(self, mode='human'):
-        pass
+        if self.chart is None:
+            self.chart = Chart()
+        else:
+            self.chart.render(self.history.iloc[:self.iterator])
 
     def seed(self, seed=None):
         self.np_random, seed1 = seeding.np_random(seed)
@@ -129,3 +136,26 @@ class SupplyEnv(gym.Env):
     
     def sample(self):
         return self.action_space.sample()
+
+    """
+    API for inventory
+    """
+    def get_inventory(self):
+        return self.history.at[self.current_date, 'stock']
+
+    def get_transit(self):
+        return self.history.at[self.current_date, 'transito']
+
+    def get_availability(self):
+        return self.history.at[self.current_date, 'disponible']
+
+    def get_order_pending(self):
+        mask = self.orders['fecha_vencimiento'] > self.current_date
+        return self.history.loc[mask]['pedido'].sum()
+
+    def get_inventory_position(self):
+        return self.inventory() + self.order_pending()
+
+    def get_average_daily_demand(self, backperiods=30):
+        mask = self.history.index < self.current_date
+        return self.history.loc[mask].loc[-backperiods:, 'demanda'].mean()

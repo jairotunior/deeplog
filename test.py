@@ -9,6 +9,7 @@ env = SupplyEnv(start_date=start_date, end_date=end_date)
 
 obs = env.reset()
 
+env.render()
 
 done = False
 
@@ -16,6 +17,8 @@ while not done:
     pedido = env.sample()
 
     obs, reward, done, _ = env.step(pedido)
+
+    env.render()
 
     if done:
         break

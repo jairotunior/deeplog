@@ -9,6 +9,34 @@ from envs.render.chart import Chart
 
 import matplotlib.pyplot as plt
 
+class DataSource:
+    def __init__(self, start_date, end_date):
+        self.start_date = datetime.strptime(start_date, "%Y/%m/%d")
+        self.end_date = datetime.strptime(end_date, "%Y/%m/%d")
+
+        self.range_date = pd.date_range(start=start_date, end=end_date, freq='D')
+
+        self.history = pd.DataFrame({'index': self.range_date,
+                                    'demanda': np.zeros((len(self.range_date),)),
+                                    })
+        self.history = self.history.set_index('index')
+
+        self.iterator = 0
+        self.current_date = self.range_date[self.iterator]
+
+    def next(self):
+        # Get the consumo
+        self.history.at[self.current_date, 'demanda'] = np.random.randint(0,
+                                    1900,
+                                    size=(1,)
+                                    )
+
+        obs = self.history.loc[self.current_date]
+
+        self.iterator += 0
+        self.current_date = self.range_date[self.iterator]
+
+        return obs
 
 
 class SupplyEnv(gym.Env):
@@ -112,7 +140,6 @@ class SupplyEnv(gym.Env):
         obs, reward, _ = [None, 0, None]
 
         return obs, reward, done, _
-
 
 
     def reset(self):

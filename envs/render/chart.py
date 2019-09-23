@@ -12,7 +12,7 @@ class Chart:
         # Create new figure
         self.figure = plt.figure()
 
-        self.history = plt.subplot2grid((6,1), (0,0), rowspan=6, colspan=1)
+        self.history = plt.subplot2grid((6,1), (0,0), rowspan=3, colspan=1)
 
         self.history.set_title('Inventory Levels')
         self.history.set_xlabel('Date')
@@ -29,6 +29,13 @@ class Chart:
 
         self.history.xaxis.set_minor_locator(months)
 
+        self.orders = plt.subplot2grid((6, 1), (3, 0), rowspan=2, colspan=1, sharex=self.history)
+
+        self.orders.set_title("Orders")
+        self.orders.set_xlabel("Date")
+        self.orders.set_ylabel("Quantity")
+
+        plt.tight_layout()
 
         # Show the graph without blocking the rest of the program
         plt.show(block=False)
@@ -37,6 +44,8 @@ class Chart:
     def render(self, df):
 
         self.history.step(df.index.values, df['stock'].values, 'g')
+
+        self.orders.plot(df.index.values, df['pedido'].values, 'b+')
 
         plt.pause(0.001)
 

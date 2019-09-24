@@ -9,29 +9,32 @@ from envs.render.chart import Chart
 
 import matplotlib.pyplot as plt
 
+
 class DataSource:
-    def __init__(self, start_date, end_date):
+    def __init__(self, start_date, end_date, dist_fn=None):
         self.start_date = datetime.strptime(start_date, "%Y/%m/%d")
         self.end_date = datetime.strptime(end_date, "%Y/%m/%d")
 
+        if callable(dist_fn):
+            self.dist_fn = dist_fn
+        else:
+            assert ValueError("The parameter dist_fn must be callable.")
+
         self.range_date = pd.date_range(start=start_date, end=end_date, freq='D')
 
-        self.history = pd.DataFrame({'index': self.range_date,
+        self.historical = pd.DataFrame({'index': self.range_date,
                                     'demanda': np.zeros((len(self.range_date),)),
                                     })
-        self.history = self.history.set_index('index')
+        self.historical = self.history.set_index('index')
 
         self.iterator = 0
         self.current_date = self.range_date[self.iterator]
 
     def next(self):
         # Get the consumo
-        self.history.at[self.current_date, 'demanda'] = np.random.randint(0,
-                                    1900,
-                                    size=(1,)
-                                    )
+        self.historical.at[self.current_date, 'demanda'] = dist_fn()
 
-        obs = self.history.loc[self.current_date]
+        obs = self.historical.loc[self.current_date]
 
         self.iterator += 0
         self.current_date = self.range_date[self.iterator]
@@ -43,12 +46,12 @@ class SupplyEnv(gym.Env):
 
     metadata = {'render.modes': ['human', 'system']}
 
-    def __init__(self, start_date, end_date):
+    def __init__(self, start_date, end_date, lead_time):
 
         self.start_date = datetime.strptime(start_date, "%Y/%m/%d")
         self.end_date = datetime.strptime(end_date, "%Y/%m/%d")
 
-        self.lead_time = timedelta(days=10)
+        self.lead_time = timedelta(days=lead_time)
 
         self.range_date = pd.date_range(start=start_date, end=end_date, freq='D')
 
@@ -59,6 +62,7 @@ class SupplyEnv(gym.Env):
                                     'fecha_vencimiento': np.zeros((len(self.range_date),))
                                     })
         self.orders = self.orders.set_index('index')
+        self.orders['fecha_vencimiento'] = self.orders['fecha_vencimiento'].astype('datetime64[ns]')
 
         self.history = pd.DataFrame({'index': self.range_date,
                                     'demanda': np.zeros((len(self.range_date),)),
@@ -93,15 +97,13 @@ class SupplyEnv(gym.Env):
 
     def _calculate(self):
         # Initial Stock
-        self.history.at[self.current_date, 'stock'] = 2000
+        self.history.at[self.current_date, 'stock'] = 30000
 
 
     def step(self, action):
         # Get the consumo
-        self.history.at[self.current_date, 'demanda'] = np.random.randint(0,
-                                    1900,
-                                    size=(1,)
-                                    )
+        #self.history.at[self.current_date, 'demanda'] = np.random.randint(0, 1900, size=(1,))
+        self.history.at[self.current_date, 'demanda'] = 1900
 
         # Save the order
         self.orders.at[self.current_date, 'pedido'] = action[0]
@@ -178,10 +180,10 @@ class SupplyEnv(gym.Env):
 
     def get_order_pending(self):
         mask = self.orders['fecha_vencimiento'] > self.current_date
-        return self.history.loc[mask]['pedido'].sum()
+        return self.orders.loc[mask]['pedido'].sum()
 
     def get_inventory_position(self):
-        return self.inventory() + self.order_pending()
+        return self.get_inventory() + self.get_order_pending()
 
     def get_average_daily_demand(self, backperiods=30):
         mask = self.history.index < self.current_date

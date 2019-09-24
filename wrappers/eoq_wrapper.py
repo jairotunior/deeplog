@@ -8,7 +8,8 @@ import numpy as np
 class EOQWrapper(gym.Wrapper):
 
     def __init__(self, env: SupplyEnv):
-        pass
+
+        self.reorder_point = 0
 
     def step(self, action):
         pass

@@ -1,11 +1,13 @@
 import gym
+import math
 from envs import SupplyEnv
 
 start_date = "2017/01/01"
 end_date = "2017/12/31"
 
+lead_time = 7
 
-env = SupplyEnv(start_date=start_date, end_date=end_date)
+env = SupplyEnv(start_date=start_date, end_date=end_date, lead_time=lead_time)
 
 obs = env.reset()
 
@@ -13,10 +15,25 @@ env.render()
 
 done = False
 
-while not done:
-    pedido = env.sample()
 
-    obs, reward, done, _ = env.step(pedido)
+demanda = 1900 * 365
+
+q = math.ceil(math.sqrt(2*demanda*1000/2.5))
+
+print("EOQ: ", q)
+
+demanda_promedio_dia = demanda / 365
+
+rop = demanda_promedio_dia * lead_time
+
+while not done:
+    #pedido = env.sample()
+    pedido = 0
+
+    if env.get_inventory_position() <= rop:
+        pedido = q
+
+    obs, reward, done, _ = env.step([pedido])
 
     env.render()
 

@@ -43,9 +43,14 @@ class Chart:
 
     def render(self, df):
 
-        self.history.step(df.index.values, df['stock'].values, 'g')
+        self.history.plot(df.index.values, df['stock'].values, 'g')
 
-        self.orders.plot(df.index.values, df['pedido'].values, 'b+')
+        self.history.step(df.index.values, df['transito'].values, 'r')
+
+        self.history.step(df.index.values, df['rop'].values, 'b')
+
+
+        self.history.plot(df.index.values, df['pedido'].values, 'b+')
 
         plt.pause(0.001)
 

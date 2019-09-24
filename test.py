@@ -26,9 +26,14 @@ demanda_promedio_dia = demanda / 365
 
 rop = demanda_promedio_dia * lead_time
 
+env.history['rop'] = rop
+
 while not done:
     #pedido = env.sample()
     pedido = 0
+
+    print("Date: {} - Demanda: {} - Inventory: {} - Transito: {} - OP: {} - Inventory Position: {} - ROP: {}".format(
+        env.current_date, env.get_demand(), env.get_inventory(), env.get_transit(), env.get_order_pending(), env.get_inventory_position(), rop))
 
     if env.get_inventory_position() <= rop:
         pedido = q
@@ -39,6 +44,8 @@ while not done:
 
     if done:
         break
+
+env.chart.figure.savefig("image.png")
 
 print("Environment End")
 print(env.history)

@@ -103,7 +103,11 @@ class SupplyEnv(gym.Env):
     def step(self, action):
         # Get the consumo
         #self.history.at[self.current_date, 'demanda'] = np.random.randint(0, 1900, size=(1,))
-        self.history.at[self.current_date, 'demanda'] = 1900
+
+        # This value is only know end of day
+        # Get the current stock and consumo
+        current_stock = self.history.at[self.current_date, 'stock']
+        self.history.at[self.current_date, 'demanda'] = current_consumo = 1900
 
         # Save the order
         self.orders.at[self.current_date, 'pedido'] = action[0]
@@ -121,12 +125,8 @@ class SupplyEnv(gym.Env):
         if current_transito > 0:
             self.history.at[self.current_date, 'transito'] = current_transito
 
-        # Get the current stock and consumo
-        current_stock = self.history.at[self.current_date, 'stock']
-        current_consumo = self.history.at[self.current_date, 'demanda']
-
         # Set current availability
-        self.history.at[self.current_date, 'disponible'] = current_stock + current_transito - current_consumo
+        self.history.at[self.current_date, 'disponible'] = current_stock + current_transito
 
         # Validate if the environment ends
         done = self.iterator == (len(self.range_date) - 1)
@@ -169,6 +169,9 @@ class SupplyEnv(gym.Env):
     """
     API for inventory
     """
+    def get_demand(self):
+        return self.history.at[self.current_date, 'demanda']
+
     def get_inventory(self):
         return self.history.at[self.current_date, 'stock']
 

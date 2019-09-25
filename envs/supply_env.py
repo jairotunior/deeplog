@@ -98,16 +98,16 @@ class SupplyEnv(gym.Env):
     def _calculate(self):
         # Initial Stock
         self.history.at[self.current_date, 'stock'] = 30000
+        # Generate demand
+        self.history.at[self.current_date, 'demanda'] = current_consumo = 1000
 
 
     def step(self, action):
+        print("Base")
         # Get the consumo
         #self.history.at[self.current_date, 'demanda'] = np.random.randint(0, 1900, size=(1,))
 
-        # This value is only know end of day
-        # Get the current stock and consumo
-        current_stock = self.history.at[self.current_date, 'stock']
-        self.history.at[self.current_date, 'demanda'] = current_consumo = 1900
+        current_consumo = self.history.at[self.current_date, 'demanda']
 
         # Save the order
         self.orders.at[self.current_date, 'pedido'] = action[0]
@@ -115,6 +115,9 @@ class SupplyEnv(gym.Env):
         self.orders.at[self.current_date, 'fecha_vencimiento'] = self.range_date[self.iterator] + self.lead_time
 
         self.history.at[self.current_date, 'pedido'] = action[0]
+
+        # Get the current stock and consumo
+        current_stock = self.history.at[self.current_date, 'stock']
 
         # Get incoming orders
         mask = self.orders['fecha_entrega'] == self.current_date
@@ -138,7 +141,10 @@ class SupplyEnv(gym.Env):
 
             # Set new stock for next day
             self.history.at[self.current_date, 'stock'] = current_stock + current_transito - current_consumo
-            
+
+        # Generate demand
+        self.history.at[self.current_date, 'demanda'] = current_consumo = 1000
+
         obs, reward, _ = [None, 0, None]
 
         return obs, reward, done, _
@@ -176,17 +182,18 @@ class SupplyEnv(gym.Env):
         return self.history.at[self.current_date, 'stock']
 
     def get_transit(self):
-        return self.history.at[self.current_date, 'transito']
+        mask = self.orders['fecha_vencimiento'] == self.current_date
+        return self.orders.loc[mask]['pedido'].sum()
 
     def get_availability(self):
-        return self.history.at[self.current_date, 'disponible']
+        return self.get_inventory() + self.get_transit()
 
     def get_order_pending(self):
         mask = self.orders['fecha_vencimiento'] > self.current_date
         return self.orders.loc[mask]['pedido'].sum()
 
     def get_inventory_position(self):
-        return self.get_inventory() + self.get_order_pending()
+        return self.get_availability() + self.get_order_pending()
 
     def get_average_daily_demand(self, backperiods=30):
         mask = self.history.index < self.current_date

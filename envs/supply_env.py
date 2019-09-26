@@ -12,13 +12,11 @@ import matplotlib.pyplot as plt
 
 class DataSource:
     def __init__(self, start_date, end_date, dist_fn=None):
+        assert isinstance(dist_fn, int) or isinstance(dist_fn, float) or callable(dist_fn)
+
         self.start_date = datetime.strptime(start_date, "%Y/%m/%d")
         self.end_date = datetime.strptime(end_date, "%Y/%m/%d")
-
-        if callable(dist_fn):
-            self.dist_fn = dist_fn
-        else:
-            assert ValueError("The parameter dist_fn must be callable.")
+        self.dist_fn = dist_fn
 
         self.range_date = pd.date_range(start=start_date, end=end_date, freq='D')
 
@@ -30,9 +28,14 @@ class DataSource:
         self.iterator = 0
         self.current_date = self.range_date[self.iterator]
 
+    def _generate(self):
+        if callable(self.dist_fn):
+            return self.dist_fn()
+        return self.dist_fn()
+
     def next(self):
         # Get the consumo
-        self.historical.at[self.current_date, 'demanda'] = dist_fn()
+        self.historical.at[self.current_date, 'demanda'] = self._generate()
 
         obs = self.historical.loc[self.current_date]
 
@@ -54,7 +57,6 @@ class SupplyEnv(gym.Env):
         self.lead_time = timedelta(days=lead_time)
 
         self.range_date = pd.date_range(start=start_date, end=end_date, freq='D')
-
 
         self.orders = pd.DataFrame({'index': self.range_date,
                                     'pedido': np.zeros((len(self.range_date),)),
@@ -97,16 +99,13 @@ class SupplyEnv(gym.Env):
 
     def _calculate(self):
         # Initial Stock
-        self.history.at[self.current_date, 'stock'] = 30000
+        self.history.at[self.current_date, 'stock'] = 20000
         # Generate demand
         self.history.at[self.current_date, 'demanda'] = current_consumo = 1000
+        # self.history.at[self.current_date, 'demanda'] = np.random.randint(0, 1000, size=(1,))
 
 
     def step(self, action):
-        print("Base")
-        # Get the consumo
-        #self.history.at[self.current_date, 'demanda'] = np.random.randint(0, 1900, size=(1,))
-
         current_consumo = self.history.at[self.current_date, 'demanda']
 
         # Save the order
@@ -144,6 +143,7 @@ class SupplyEnv(gym.Env):
 
         # Generate demand
         self.history.at[self.current_date, 'demanda'] = current_consumo = 1000
+        # self.history.at[self.current_date, 'demanda'] = np.random.randint(0, 1000, size=(1,))
 
         obs, reward, _ = [None, 0, None]
 

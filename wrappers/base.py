@@ -22,9 +22,15 @@ class CustomModelWrapper(gym.Wrapper):
     def render(self, mode='human'):
         self.env.render(mode=mode)
 
+        window_size = 20
+        window_start = max(self.env.iterator - window_size, 0)
+        step_range = slice(window_start, self.env.iterator + 1)
+
         # Plot all series
         for serie in self.series.columns:
-            self.env.chart.history.plot(self.series.index, self.series[serie], color='b')
+            self.env.chart.history.plot(self.series.iloc[window_start:self.env.iterator][serie].index.values,
+                                        self.series.iloc[window_start:self.env.iterator][serie].values,
+                                        color='r')
 
     def add_serie(self, serie_name, type=int):
         if serie_name in self.series:

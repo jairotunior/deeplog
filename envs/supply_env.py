@@ -92,7 +92,7 @@ class SupplyEnv(gym.Env):
 
         self.seed()
 
-        self.chart = None
+        self.chart = Chart()
 
         self._calculate()
 

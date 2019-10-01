@@ -10,6 +10,9 @@ class Chart:
 
     def __init__(self):
 
+        # Legends Base
+        self.legends = ['Stock']
+
         # Create new figure
         self.figure = plt.figure()
 
@@ -52,14 +55,15 @@ class Chart:
         plt.show(block=False)
 
 
-    def render(self, df):
+    def render(self, df, iterator):
 
-        self.history.plot(df.index.values, df['stock'].values, 'g')
-        self.history.legend(['ROP', 'Stock'])
+        serie = df.iloc[:iterator]
+        self.history.plot(serie.index.values, serie['stock'].values, 'g')
+        #self.history.legend(['ROP', 'Stock'])
         #self.history.step(df.index.values, df['transito'].values, 'r')
 
         #self.orders.plot(df.index.values, df['pedido'].values, 'b+')
-        self.orders.bar(df.index, df['pedido'], width=5, color='b')
+        self.orders.bar(df.index, serie['pedido'], width=5, color='b')
 
         plt.pause(0.001)
 

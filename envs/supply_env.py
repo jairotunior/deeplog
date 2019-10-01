@@ -161,7 +161,7 @@ class SupplyEnv(gym.Env):
         if self.chart is None:
             self.chart = Chart()
         else:
-            self.chart.render(self.history.iloc[:self.iterator])
+            self.chart.render(self.history, self.iterator)
 
     def seed(self, seed=None):
         self.np_random, seed1 = seeding.np_random(seed)

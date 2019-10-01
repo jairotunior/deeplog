@@ -13,6 +13,10 @@ class CustomModelWrapper(gym.Wrapper):
         self.series: pd.DataFrame = pd.DataFrame({'date': self.env.range_date})
         self.series = self.series.set_index('date')
 
+        self.series_info: dict = {}
+
+        self.legends = []
+
     def step(self, action):
         return self.env.step(action)
 
@@ -30,11 +34,20 @@ class CustomModelWrapper(gym.Wrapper):
         for serie in self.series.columns:
             self.env.chart.history.plot(self.series.iloc[window_start:self.env.iterator][serie].index.values,
                                         self.series.iloc[window_start:self.env.iterator][serie].values,
-                                        color='r')
+                                        color=self.series_info[serie]['color'])
 
-    def add_serie(self, serie_name, type=int):
-        if serie_name in self.series:
+        self.env.chart.history.legend(self.env.chart.legends + self.legends)
+
+    def add_serie(self, serie_name, type=int, color='r'):
+        if serie_name in self.series_info.keys():
             assert ValueError("El nombre de serie '{}' ya ha sido asignado, seleccione un nombre unico.".format(serie_name))
+
+        self.series_info[serie_name] = {
+            'type': type,
+            'color': color
+        }
+
+        self.legends.append(serie_name)
 
         self.series[serie_name] = 0
         #self.series[serie_name] = self.series[serie_name].astype(type)

@@ -56,14 +56,13 @@ class Chart:
 
 
     def render(self, df, iterator):
-
         serie = df.iloc[:iterator]
         self.history.plot(serie.index.values, serie['stock'].values, 'g')
         #self.history.legend(['ROP', 'Stock'])
         #self.history.step(df.index.values, df['transito'].values, 'r')
 
         #self.orders.plot(df.index.values, df['pedido'].values, 'b+')
-        self.orders.bar(df.index, serie['pedido'], width=5, color='b')
+        self.orders.bar(serie.index.values, serie['pedido'].values, width=5, color='b')
 
         plt.pause(0.001)
 

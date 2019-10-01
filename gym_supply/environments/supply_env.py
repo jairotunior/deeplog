@@ -5,44 +5,9 @@ import numpy as np
 from datetime import datetime, timedelta
 from gym.utils import seeding
 
-from gym_supply.envs import Chart
+from gym_supply.environments.render import Chart
 
 import matplotlib.pyplot as plt
-
-
-class DataSource:
-    def __init__(self, start_date, end_date, dist_fn=None):
-        assert isinstance(dist_fn, int) or isinstance(dist_fn, float) or callable(dist_fn)
-
-        self.start_date = datetime.strptime(start_date, "%Y/%m/%d")
-        self.end_date = datetime.strptime(end_date, "%Y/%m/%d")
-        self.dist_fn = dist_fn
-
-        self.range_date = pd.date_range(start=start_date, end=end_date, freq='D')
-
-        self.historical = pd.DataFrame({'index': self.range_date,
-                                    'demanda': np.zeros((len(self.range_date),)),
-                                    })
-        self.historical = self.history.set_index('index')
-
-        self.iterator = 0
-        self.current_date = self.range_date[self.iterator]
-
-    def _generate(self):
-        if callable(self.dist_fn):
-            return self.dist_fn()
-        return self.dist_fn()
-
-    def next(self):
-        # Get the consumo
-        self.historical.at[self.current_date, 'demanda'] = self._generate()
-
-        obs = self.historical.loc[self.current_date]
-
-        self.iterator += 0
-        self.current_date = self.range_date[self.iterator]
-
-        return obs
 
 
 class SupplyEnv(gym.Env):

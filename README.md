@@ -1,4 +1,4 @@
-# Supply and Replenishment System Gym Environment
+# EngineSuppy - Supply and Replenishment
 
 [![Build Status](https://travis-ci.org/notadamking/tensortrade.svg?branch=master)](https://travis-ci.org/notadamking/tensortrade)
 [![Documentation Status](https://readthedocs.org/projects/tensortrade/badge/?version=latest)](https://tensortrade.org)
@@ -14,7 +14,8 @@
 
 ---
 
-EngineSupply is an open source Python framework for building, testing, training, evaluating, and deploying robust inventory models using reinforcement learning. This framework aims to extend the existing ML pipelines created by `pandas`, `gym`, `sklearn`, `keras`, and `tensorflow` in a simple, intuitive way.
+EngineSupply is an open source Python framework for building, testing, training, evaluating, and deploying robust inventory models using reinforcement learning.
+This framework aims to extend the existing ML pipelines created by `pandas`, `gym`, `sklearn`, `keras`, and `tensorflow` in a simple, intuitive way.
 
 Allow state-of-the-art learning agents to improve your trading strategies and take you from idea to production, in a repeatable, maintable way.
 

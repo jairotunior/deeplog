@@ -1,6 +1,6 @@
 import gym
 import gym.spaces
-from envs import SupplyEnv
+from gym_supply.envs import SupplyEnv
 import pandas as pd
 import numpy as np
 

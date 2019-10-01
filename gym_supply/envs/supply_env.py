@@ -5,7 +5,7 @@ import numpy as np
 from datetime import datetime, timedelta
 from gym.utils import seeding
 
-from envs.render.chart import Chart
+from gym_supply.envs import Chart
 
 import matplotlib.pyplot as plt
 
@@ -133,6 +133,8 @@ class SupplyEnv(gym.Env):
         # Validate if the environment ends
         done = self.iterator == (len(self.range_date) - 1)
 
+        obs, reward, _ = [current_consumo, 0, None]
+
         if not done:
             # Update iterator and Current Date
             self.iterator += 1
@@ -144,8 +146,6 @@ class SupplyEnv(gym.Env):
         # Generate demand
         self.history.at[self.current_date, 'demanda'] = current_consumo = 1000
         # self.history.at[self.current_date, 'demanda'] = np.random.randint(0, 1000, size=(1,))
-
-        obs, reward, _ = [None, 0, None]
 
         return obs, reward, done, _
 

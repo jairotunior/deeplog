@@ -1,7 +1,7 @@
 import gym
 import math
-from envs import SupplyEnv
-from wrappers import EOQWrapper
+from gym_supply.envs import SupplyEnv
+from gym_supply.wrappers import EOQWrapper
 
 start_date = "2017/01/01"
 end_date = "2017/12/31"

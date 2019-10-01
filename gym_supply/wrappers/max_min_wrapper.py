@@ -1,8 +1,8 @@
 import gym
 import gym.spaces
 import math
-from envs import SupplyEnv
-from wrappers import CustomModelWrapper
+from gym_supply.envs import SupplyEnv
+from gym_supply.wrappers import CustomModelWrapper
 import pandas as pd
 import numpy as np
 

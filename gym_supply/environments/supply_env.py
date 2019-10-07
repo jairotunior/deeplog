@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from gym.utils import seeding
 
 from gym_supply.environments.render import Chart
+from gym_supply.data import DataSource, SinteticDataSource
 
 import matplotlib.pyplot as plt
 
@@ -14,14 +15,26 @@ class SupplyEnv(gym.Env):
 
     metadata = {'render.modes': ['human', 'system']}
 
-    def __init__(self, start_date, end_date, lead_time):
+    def __init__(self, start_date, end_date, fn_demand, fn_lead_time, **kwargs):
+        assert fn_demand is None, "Debe definir una funcion demanda"
+        assert fn_lead_time is None, "Debe definir una funcion lead time"
 
         self.start_date = datetime.strptime(start_date, "%Y/%m/%d")
         self.end_date = datetime.strptime(end_date, "%Y/%m/%d")
 
-        self.lead_time = timedelta(days=lead_time)
-
         self.range_date = pd.date_range(start=start_date, end=end_date, freq='D')
+
+        self.sources = pd.DataFrame({'index': self.range_date,
+                                'demand': np.zeros((len(self.range_date),)),
+                                })
+        self.sources = self.sources.set_index('index')
+
+        self.fn_demand = fn_demand
+        self.fn_lead_time = fn_lead_time
+
+        self.lead_time = 0
+
+        self.initial_stock = kwargs.get('initial_stock', 0)
 
         self.orders = pd.DataFrame({'index': self.range_date,
                                     'pedido': np.zeros((len(self.range_date),)),
@@ -44,13 +57,6 @@ class SupplyEnv(gym.Env):
         self.current_date = self.range_date[self.iterator]
 
         #self.actions = ['pedir', 'no pedir']
-        
-        """
-        self.action_space = gym.spaces.Tuple(
-            (gym.spaces.Discrete(n=len(self.actions)), 
-            gym.spaces.Box(low=1, high=np.inf, shape=(1,), dtype=np.int))
-        )
-        """
 
         self.action_space = gym.spaces.Box(low=0, high=2000, shape=(1,), dtype=np.int)
         self.observation_space = gym.spaces.Box(low=0, high=np.inf, shape=(10, 1), dtype=np.int)
@@ -64,14 +70,19 @@ class SupplyEnv(gym.Env):
 
     def _calculate(self):
         # Initial Stock
-        self.history.at[self.current_date, 'stock'] = 20000
+        self.history.at[self.current_date, 'stock'] = self.initial_stock
         # Generate demand
-        self.history.at[self.current_date, 'demanda'] = current_consumo = 1000
+
+        current_consumo = self.fn_demand(self)
+        self.history.at[self.current_date, 'demanda'] = current_consumo
         # self.history.at[self.current_date, 'demanda'] = np.random.randint(0, 1000, size=(1,))
 
 
     def step(self, action):
         current_consumo = self.history.at[self.current_date, 'demanda']
+
+        # Get Lead Time
+        self.lead_time = timedelta(self.fn_lead_time(self))
 
         # Save the order
         self.orders.at[self.current_date, 'pedido'] = action[0]
@@ -109,7 +120,7 @@ class SupplyEnv(gym.Env):
             self.history.at[self.current_date, 'stock'] = current_stock + current_transito - current_consumo
 
         # Generate demand
-        self.history.at[self.current_date, 'demanda'] = current_consumo = 1000
+        self.history.at[self.current_date, 'demanda'] = self.fn_demand(self)
         # self.history.at[self.current_date, 'demanda'] = np.random.randint(0, 1000, size=(1,))
 
         return obs, reward, done, _

@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 
 
-class CustomModelWrapper(gym.Wrapper):
+class Model(gym.Wrapper):
 
     def __init__(self, env: SupplyEnv, costo_pedir=1000, costo_mantener=2.5):
         gym.Wrapper.__init__(self, env)
@@ -26,6 +26,10 @@ class CustomModelWrapper(gym.Wrapper):
     def render(self, mode='human'):
         self.env.render(mode=mode)
 
+        # Plot all series
+        self._plot()
+
+    def _plot(self):
         window_size = 20
         window_start = max(self.env.iterator - window_size, 0)
         step_range = slice(window_start, self.env.iterator + 1)
@@ -37,6 +41,7 @@ class CustomModelWrapper(gym.Wrapper):
                                         color=self.series_info[serie]['color'])
 
         self.env.chart.history.legend(self.env.chart.legends + self.legends)
+
 
     def add_serie(self, serie_name, type=int, color='r'):
         if serie_name in self.series_info.keys():

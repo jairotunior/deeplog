@@ -2,15 +2,15 @@ import gym
 import gym.spaces
 import math
 from gym_supply.environments import SupplyEnv
-from gym_supply.wrappers import CustomModelWrapper
+from gym_supply.wrappers import Model
 import pandas as pd
 import numpy as np
 
 
-class MaxMinWrapper(CustomModelWrapper):
+class MaxMin(Model):
 
     def __init__(self, env: SupplyEnv, costo_pedir=1000, costo_mantener=2.5):
-        CustomModelWrapper.__init__(self, env)
+        Model.__init__(self, env)
         self.demanda_anual = 1000 * 365
 
         self.lead_time = self.env.lead_time

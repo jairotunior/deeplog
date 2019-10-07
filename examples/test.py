@@ -1,14 +1,14 @@
 import gym
 import math
 from gym_supply.environments import SupplyEnv
-from gym_supply.wrappers import EOQWrapper
+from gym_supply.wrappers import EOQ
 
 start_date = "2017/01/01"
 end_date = "2017/12/31"
 lead_time = 7
 
 env = SupplyEnv(start_date=start_date, end_date=end_date, lead_time=lead_time)
-env = EOQWrapper(env)
+env = EOQ(env)
 
 obs = env.reset()
 

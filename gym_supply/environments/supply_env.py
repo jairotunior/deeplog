@@ -22,8 +22,12 @@ class SupplyEnv(gym.Env):
         self.start_date = datetime.strptime(start_date, "%Y/%m/%d")
         self.end_date = datetime.strptime(end_date, "%Y/%m/%d")
 
+        # Get Initial Stock
+        self.initial_stock = kwargs.get('initial_stock', 0)
+
         self.range_date = pd.date_range(start=start_date, end=end_date, freq='D')
 
+        self.serie_names = []
         self.sources = pd.DataFrame({'index': self.range_date,
                                 'demand': np.zeros((len(self.range_date),)),
                                 })
@@ -65,24 +69,31 @@ class SupplyEnv(gym.Env):
 
         self.chart = Chart()
 
+        # Set Initial Stock
+        self.history.at[self.current_date, 'stock'] = self.initial_stock
+
+        # Calculate Demand and Lead Time
         self._calculate()
 
+    def _compute_all_sources(self):
+        for serie in self.serie_names:
+            pass
+
+    def get_data_serie_value(self):
+        pass
 
     def _calculate(self):
-        # Initial Stock
-        self.history.at[self.current_date, 'stock'] = self.initial_stock
         # Generate demand
-
-        current_consumo = self.fn_demand(self)
-        self.history.at[self.current_date, 'demanda'] = current_consumo
-        # self.history.at[self.current_date, 'demanda'] = np.random.randint(0, 1000, size=(1,))
-
-
-    def step(self, action):
-        current_consumo = self.history.at[self.current_date, 'demanda']
+        self.history.at[self.current_date, 'demanda'] = self.fn_demand(self)
 
         # Get Lead Time
         self.lead_time = timedelta(self.fn_lead_time(self))
+
+
+    def step(self, action):
+
+        # Get current Demand
+        current_demand = self.history.at[self.current_date, 'demanda']
 
         # Save the order
         self.orders.at[self.current_date, 'pedido'] = action[0]
@@ -109,7 +120,7 @@ class SupplyEnv(gym.Env):
         # Validate if the environment ends
         done = self.iterator == (len(self.range_date) - 1)
 
-        obs, reward, _ = [current_consumo, 0, None]
+        obs, reward, _ = [current_demand, 0, None]
 
         if not done:
             # Update iterator and Current Date
@@ -117,11 +128,10 @@ class SupplyEnv(gym.Env):
             self.current_date = self.range_date[self.iterator]
 
             # Set new stock for next day
-            self.history.at[self.current_date, 'stock'] = current_stock + current_transito - current_consumo
+            self.history.at[self.current_date, 'stock'] = current_stock + current_transito - current_demand
 
-        # Generate demand
-        self.history.at[self.current_date, 'demanda'] = self.fn_demand(self)
-        # self.history.at[self.current_date, 'demanda'] = np.random.randint(0, 1000, size=(1,))
+        # Calculate Demand and Lead Time
+        self._calculate()
 
         return obs, reward, done, _
 

@@ -7,7 +7,7 @@ import numpy as np
 
 class Model(gym.Wrapper):
 
-    def __init__(self, env: SupplyEnv, costo_pedir=1000, costo_mantener=2.5):
+    def __init__(self, env: SupplyEnv):
         gym.Wrapper.__init__(self, env)
 
         self.series: pd.DataFrame = pd.DataFrame({'date': self.env.range_date})

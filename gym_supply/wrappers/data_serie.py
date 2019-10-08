@@ -12,6 +12,8 @@ class Base(gym.Wrapper):
         self.start_date = self.unwrapped.start_date
         self.end_date = self.unwrapped.end_date
         self.range_date = self.unwrapped.range_date
+
+        self.serie_names = self.unwrapped.serie_names
         self.sources = self.unwrapped.sources
 
         # Set all base variables
@@ -20,9 +22,6 @@ class Base(gym.Wrapper):
     def _set_base_variables(self):
         self.iterator = self.unwrapped.iterator
         self.current_date = self.unwrapped.current_date
-
-    def get_data_serie_value(self):
-        pass
 
     def step(self, action):
         obs, reward, info, _ = self.env.action(action)
@@ -39,7 +38,9 @@ class Base(gym.Wrapper):
 
 def fn_demand(mean, sigma):
     def fn(env):
-        return np.ceil(np.random.normal)
+        return np.ceil(np.random.normal(mean, sigma, 1))
+
+    return fn
 
 
 class DataSerie(Base):
@@ -48,10 +49,23 @@ class DataSerie(Base):
         Base.__init__(self, env)
 
         self.name = name
+        self.serie_names.append(self.name)
+
+        self.sources[self.name] = 0
 
         self.dist_fn = dist_fn
 
-    @override
-    def _generate(self):
-        raise NotImplementedError("El metodo _generate no ha sido implementado en la clase hija.")
+    def _compute_all_sources(self):
+        serie_value = self.dist_fn(self)
+        self.sources.at[self.current_date, self.name] = serie_value
+
+        return [serie_value]
+
+    def step(self, action):
+        serie_value = self._compute_all_sources()
+
+        obs, reward, info, _ = self.env.step(action)
+        obs = obs + serie_value
+
+        return obs, reward, info, _
 

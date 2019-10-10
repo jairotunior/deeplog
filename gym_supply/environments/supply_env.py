@@ -5,8 +5,11 @@ import numpy as np
 from datetime import datetime, timedelta
 from gym.utils import seeding
 
+from gym_supply.utils import get_value
 from gym_supply.environments.render import Chart
 from gym_supply.data import DataSource, SinteticDataSource
+
+from functools import partial
 
 import matplotlib.pyplot as plt
 
@@ -16,8 +19,8 @@ class SupplyEnv(gym.Env):
     metadata = {'render.modes': ['human', 'system']}
 
     def __init__(self, start_date, end_date, fn_demand, fn_lead_time, **kwargs):
-        assert fn_demand is None, "Debe definir una funcion demanda"
-        assert fn_lead_time is None, "Debe definir una funcion lead time"
+        assert callable(fn_demand) or isinstance(fn_demand, int), "Debe definir una funcion demanda"
+        assert callable(fn_lead_time) or isinstance(fn_lead_time, int), "Debe definir una funcion lead time"
 
         self.start_date = datetime.strptime(start_date, "%Y/%m/%d")
         self.end_date = datetime.strptime(end_date, "%Y/%m/%d")
@@ -33,8 +36,16 @@ class SupplyEnv(gym.Env):
                                 })
         self.sources = self.sources.set_index('index')
 
-        self.fn_demand = fn_demand
-        self.fn_lead_time = fn_lead_time
+        # Validate if the function is callable or a number
+        if callable(fn_demand):
+            self.fn_demand = partial(fn_demand, self)
+        else:
+            self.fn_demand = fn_demand
+
+        if callable(fn_lead_time):
+            self.fn_lead_time = partial(fn_lead_time, self)
+        else:
+            self.fn_lead_time = fn_lead_time
 
         self.lead_time = 0
 
@@ -84,10 +95,10 @@ class SupplyEnv(gym.Env):
 
     def _calculate(self):
         # Generate demand
-        self.history.at[self.current_date, 'demanda'] = self.fn_demand(self)
+        self.history.at[self.current_date, 'demanda'] = get_value(self.fn_demand)
 
         # Get Lead Time
-        self.lead_time = timedelta(self.fn_lead_time(self))
+        self.lead_time = timedelta(get_value(self.fn_lead_time))
 
 
     def step(self, action):
@@ -120,7 +131,8 @@ class SupplyEnv(gym.Env):
         # Validate if the environment ends
         done = self.iterator == (len(self.range_date) - 1)
 
-        obs, reward, _ = [current_demand, 0, None]
+        obs = [self.current_date, current_demand]
+        reward, _ = [0, None]
 
         if not done:
             # Update iterator and Current Date

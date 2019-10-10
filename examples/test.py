@@ -1,14 +1,22 @@
 import gym
+import numpy as np
 import math
 from gym_supply.environments import SupplyEnv
-from gym_supply.wrappers import EOQ
+from models import EOQModel
+
+
+def fn_demand(mean, sigma):
+    def fn(env):
+        return np.random.normal(mean, sigma, 1)
+    return fn
 
 start_date = "2017/01/01"
 end_date = "2017/12/31"
+
 lead_time = 7
 
-env = SupplyEnv(start_date=start_date, end_date=end_date, lead_time=lead_time)
-env = EOQ(env)
+env = SupplyEnv(start_date=start_date, end_date=end_date, fn_demand=1000, fn_lead_time=lead_time, initial_stock=10000)
+env = EOQModel(env)
 
 obs = env.reset()
 
@@ -17,10 +25,6 @@ env.render()
 done = False
 
 while not done:
-    """
-    print("Date: {} - Demanda: {} - Inventory: {} - Transito: {} - OP: {} - Inventory Position: {} - ROP: {}".format(
-        env.current_date, env.get_demand(), env.get_inventory(), env.get_transit(), env.get_order_pending(), env.get_inventory_position(), rop))
-    """
     action = env.sample()
 
     obs, reward, done, _ = env.step(action)

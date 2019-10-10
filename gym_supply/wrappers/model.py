@@ -4,10 +4,12 @@ from gym_supply.environments import SupplyEnv
 import pandas as pd
 import numpy as np
 
+from gym_supply.wrappers import Base
 
-class Model(gym.Wrapper):
 
-    def __init__(self, env: SupplyEnv):
+class Model(Base):
+
+    def __init__(self, env):
         gym.Wrapper.__init__(self, env)
 
         self.series: pd.DataFrame = pd.DataFrame({'date': self.env.range_date})

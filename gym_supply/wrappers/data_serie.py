@@ -2,8 +2,11 @@ import gym
 import pandas as pd
 import numpy as np
 
+from abc import ABC
+from gym_supply.utils import get_value
 
-class Base(gym.Wrapper):
+
+class Base(gym.Wrapper, ABC):
 
     def __init__(self, env):
         gym.Wrapper.__init__(self, env)
@@ -12,6 +15,9 @@ class Base(gym.Wrapper):
         self.start_date = self.unwrapped.start_date
         self.end_date = self.unwrapped.end_date
         self.range_date = self.unwrapped.range_date
+
+        self.fn_demand = self.unwrapped.fn_demand
+        self.fn_lead_time = self.unwrapped.fn_lead_time
 
         self.serie_names = self.unwrapped.serie_names
         self.sources = self.unwrapped.sources
@@ -34,6 +40,14 @@ class Base(gym.Wrapper):
         self._set_base_variables()
 
         return obs
+
+    @property
+    def demand(self):
+        return get_value(self.unwrapped.fn_demand)
+
+    @property
+    def lead_time(self):
+        return get_value(self.unwrapped.fn_lead_time)
 
 
 def fn_demand(mean, sigma):

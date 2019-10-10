@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 
-class MaxMin(Model):
+class MaxMinModel(Model):
 
     def __init__(self, env: SupplyEnv, costo_pedir=1000, costo_mantener=2.5):
         Model.__init__(self, env)

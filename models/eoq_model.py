@@ -7,16 +7,15 @@ import pandas as pd
 import numpy as np
 
 
-class EOQ(Model):
+class EOQModel(Model):
     def __init__(self, env: SupplyEnv, costo_pedir=1000, costo_mantener=2.5):
         Model.__init__(self, env)
-        self.demanda_anual = 1000 * 365
+        self.demanda_anual = self.demand * 365
 
-        self.lead_time = self.env.lead_time
         self.s = costo_pedir
         self.h = costo_mantener
 
-        self.rop = (self.demanda_anual / 365) * self.lead_time.days
+        self.rop = (self.demanda_anual / 365) * self.lead_time
         self.eoq = math.ceil(math.sqrt(2 * self.demanda_anual * self.s / self.h))
 
         # Add serie rop

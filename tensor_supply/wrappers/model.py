@@ -1,16 +1,18 @@
 import gym
 import gym.spaces
-from gym_supply.environments import SupplyEnv
+from tensor_supply.environments import SupplyEnv
 import pandas as pd
 import numpy as np
 
-from gym_supply.wrappers import Base
+from tensor_supply.wrappers import Base
+
+from abc import ABC, abstractmethod
 
 
 class Model(Base):
 
     def __init__(self, env):
-        gym.Wrapper.__init__(self, env)
+        Base.__init__(self, env)
 
         self.series: pd.DataFrame = pd.DataFrame({'date': self.env.range_date})
         self.series = self.series.set_index('date')
@@ -20,6 +22,7 @@ class Model(Base):
         self.legends = []
 
     def step(self, action):
+        self._plot_series()
         return self.env.step(action)
 
     def reset(self):
@@ -31,26 +34,32 @@ class Model(Base):
         # Plot all series
         self._plot()
 
-    def _plot(self):
-        window_size = 20
-        window_start = max(self.env.iterator - window_size, 0)
-        step_range = slice(window_start, self.env.iterator + 1)
+    @abstractmethod
+    def _plot_series(self):
+        pass
 
-        # Plot all series
-        for serie in self.series.columns:
-            self.env.chart.history.plot(self.series.iloc[window_start:self.env.iterator][serie].index.values,
-                                        self.series.iloc[window_start:self.env.iterator][serie].values,
-                                        color=self.series_info[serie]['color'])
+    def _plot(self):
+        if self.env.iterator > 0:
+            window_size = 20
+            window_start = max(self.env.iterator - window_size, 1)
+            print("Window Start: ", window_start)
+            step_range = slice(window_start, self.env.iterator + 1)
+
+            # Plot all series
+            for serie in self.series.columns:
+                    self.env.chart.history.plot(self.series.iloc[window_start:self.env.iterator][serie].index.values,
+                                                self.series.iloc[window_start:self.env.iterator][serie].values,
+                                                color=self.series_info[serie]['color'])
 
         self.env.chart.history.legend(self.env.chart.legends + self.legends)
 
 
-    def add_serie(self, serie_name, type=int, color='r'):
+    def add_serie(self, serie_name, color='r'):
         if serie_name in self.series_info.keys():
             assert ValueError("El nombre de serie '{}' ya ha sido asignado, seleccione un nombre unico.".format(serie_name))
 
         self.series_info[serie_name] = {
-            'type': type,
+            #'type': type,
             'color': color
         }
 

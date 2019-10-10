@@ -9,7 +9,6 @@ register_matplotlib_converters()
 class Chart:
 
     def __init__(self):
-
         # Legends Base
         self.legends = ['Stock']
 
@@ -56,15 +55,18 @@ class Chart:
 
 
     def render(self, df, iterator):
-        serie = df.iloc[:iterator]
-        self.history.plot(serie.index.values, serie['stock'].values, 'g')
-        #self.history.legend(['ROP', 'Stock'])
-        #self.history.step(df.index.values, df['transito'].values, 'r')
 
-        #self.orders.plot(df.index.values, df['pedido'].values, 'b+')
-        self.orders.bar(serie.index.values, serie['pedido'].values, width=5, color='b')
+        if iterator > 0:
+            serie = df.iloc[:iterator]
 
-        plt.pause(0.001)
+            self.history.plot(serie.index.values, serie['stock'].values, 'g--')
+            #self.history.legend(['ROP', 'Stock'])
+            #self.history.step(df.index.values, df['transito'].values, 'r')
+
+            #self.orders.plot(df.index.values, df['pedido'].values, 'b+')
+            self.orders.bar(serie.index.values, serie['pedido'].values, width=5, color='b')
+
+            plt.pause(0.001)
 
     def close(self):
         plt.close()

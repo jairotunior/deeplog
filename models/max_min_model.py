@@ -1,8 +1,7 @@
 import gym
 import gym.spaces
-import math
-from gym_supply.environments import SupplyEnv
-from gym_supply.wrappers import Model
+from tensor_supply.environments import SupplyEnv
+from tensor_supply.wrappers import Model
 import pandas as pd
 import numpy as np
 

@@ -1,7 +1,7 @@
 import gym
 import numpy as np
 import math
-from gym_supply.environments import SupplyEnv
+from tensor_supply.environments import SupplyEnv
 from models import EOQModel
 
 

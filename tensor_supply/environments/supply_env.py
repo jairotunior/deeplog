@@ -5,13 +5,10 @@ import numpy as np
 from datetime import datetime, timedelta
 from gym.utils import seeding
 
-from gym_supply.utils import get_value
-from gym_supply.environments.render import Chart
-from gym_supply.data import DataSource, SinteticDataSource
+from tensor_supply.utils import get_value
+from tensor_supply.render import Chart
 
 from functools import partial
-
-import matplotlib.pyplot as plt
 
 
 class SupplyEnv(gym.Env):
@@ -85,13 +82,6 @@ class SupplyEnv(gym.Env):
 
         # Calculate Demand and Lead Time
         self._calculate()
-
-    def _compute_all_sources(self):
-        for serie in self.serie_names:
-            pass
-
-    def get_data_serie_value(self):
-        pass
 
     def _calculate(self):
         # Generate demand

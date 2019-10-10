@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 from abc import ABC
-from gym_supply.utils import get_value
+from tensor_supply.utils import get_value
 
 
 class Base(gym.Wrapper, ABC):
@@ -23,7 +23,8 @@ class Base(gym.Wrapper, ABC):
         self.sources = self.unwrapped.sources
 
         # Set all base variables
-        self._set_base_variables()
+        self.iterator = self.unwrapped.iterator
+        self.current_date = self.unwrapped.current_date
 
     def _set_base_variables(self):
         self.iterator = self.unwrapped.iterator

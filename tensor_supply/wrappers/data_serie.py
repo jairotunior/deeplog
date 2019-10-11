@@ -5,6 +5,8 @@ import numpy as np
 from abc import ABC
 from tensor_supply.utils import get_value
 
+from functools import partial
+
 
 class Base(gym.Wrapper, ABC):
 
@@ -60,18 +62,24 @@ def fn_demand(mean, sigma):
 
 class DataSerie(Base):
 
-    def __init__(self, env, name, dist_fn):
+    def __init__(self, env, name, fn_dist):
         Base.__init__(self, env)
+
+        assert callable(fn_dist) or isinstance(fn_dist, int), "Debe definir una funcion de distribución"
 
         self.name = name
         self.serie_names.append(self.name)
 
+        if callable(fn_dist):
+            self.fn_dist = partial(fn_dist, self)
+        else:
+            self.fn_dist = fn_dist
+
         self.sources[self.name] = 0
 
-        self.dist_fn = dist_fn
 
     def _compute_all_sources(self):
-        serie_value = self.dist_fn(self)
+        serie_value = get_value(self.fn_dist)
         self.sources.at[self.current_date, self.name] = serie_value
 
         return [serie_value]

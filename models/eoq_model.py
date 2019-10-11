@@ -33,7 +33,7 @@ class EOQModel(Model):
 
     def sample(self):
         pedido = 0
-        if self.env.get_inventory_position() <= self.rop:
+        if self.unwrapped.get_inventory_position() <= self.rop:
             pedido = self.eoq
 
         return [pedido]

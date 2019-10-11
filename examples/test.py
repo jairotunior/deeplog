@@ -2,6 +2,7 @@ import gym
 import numpy as np
 import math
 from tensor_supply.environments import SupplyEnv
+from tensor_supply.wrappers import DataSerie
 from models import EOQModel
 
 
@@ -16,6 +17,7 @@ end_date = "2017/12/31"
 lead_time = 7
 
 env = SupplyEnv(start_date=start_date, end_date=end_date, fn_demand=1000, fn_lead_time=lead_time, initial_stock=10000)
+env = DataSerie(env, "Produccion", 10)
 env = EOQModel(env)
 
 obs = env.reset()

@@ -39,19 +39,19 @@ class Model(Base):
         pass
 
     def _plot(self):
-        if self.env.iterator > 0:
+        if self.unwrapped.iterator > 0:
             window_size = 20
-            window_start = max(self.env.iterator - window_size, 1)
+            window_start = max(self.unwrapped.iterator - window_size, 1)
             print("Window Start: ", window_start)
-            step_range = slice(window_start, self.env.iterator + 1)
+            step_range = slice(window_start, self.unwrapped.iterator + 1)
 
             # Plot all series
             for serie in self.series.columns:
-                    self.env.chart.history.plot(self.series.iloc[window_start:self.env.iterator][serie].index.values,
-                                                self.series.iloc[window_start:self.env.iterator][serie].values,
+                self.unwrapped.chart.history.plot(self.series.iloc[window_start:self.unwrapped.iterator][serie].index.values,
+                                                self.series.iloc[window_start:self.unwrapped.iterator][serie].values,
                                                 color=self.series_info[serie]['color'])
 
-        self.env.chart.history.legend(self.env.chart.legends + self.legends)
+        self.unwrapped.chart.history.legend(self.unwrapped.chart.legends + self.legends)
 
 
     def add_serie(self, serie_name, color='r'):

@@ -16,6 +16,8 @@ class SupplyEnv(gym.Env):
     metadata = {'render.modes': ['human', 'system']}
 
     def __init__(self, start_date, end_date, fn_demand, fn_lead_time, **kwargs):
+        gym.Env.__init__(self)
+
         assert callable(fn_demand) or isinstance(fn_demand, int), "Debe definir una funcion demanda"
         assert callable(fn_lead_time) or isinstance(fn_lead_time, int), "Debe definir una funcion lead time"
 

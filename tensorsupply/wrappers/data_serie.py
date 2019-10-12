@@ -8,7 +8,7 @@ from tensor_supply.utils import get_value
 from functools import partial
 
 
-class Base(gym.Wrapper, ABC):
+class Base(gym.Wrapper):
 
     def __init__(self, env):
         gym.Wrapper.__init__(self, env)

@@ -8,7 +8,7 @@ from models import EOQModel
 
 def fn_demand(mean, sigma):
     def fn(env):
-        return np.random.normal(mean, sigma, 1)
+        return np.ceil(np.random.normal(mean, sigma, 1))[0]
     return fn
 
 start_date = "2017/01/01"
@@ -17,7 +17,7 @@ end_date = "2017/12/31"
 lead_time = 7
 
 env = SupplyEnv(start_date=start_date, end_date=end_date, fn_demand=1000, fn_lead_time=lead_time, initial_stock=10000)
-env = DataSerie(env, "Produccion", 10)
+env = DataSerie(env, "Produccion", fn_demand(2000, 500))
 env = EOQModel(env)
 
 obs = env.reset()
@@ -30,6 +30,8 @@ while not done:
     action = env.sample()
 
     obs, reward, done, _ = env.step(action)
+
+    print(obs)
 
     env.render()
 

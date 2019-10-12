@@ -34,7 +34,6 @@ class Model(Base):
         # Plot all series
         self._plot()
 
-    @abstractmethod
     def _plot_series(self):
         pass
 
@@ -42,7 +41,6 @@ class Model(Base):
         if self.unwrapped.iterator > 0:
             window_size = 20
             window_start = max(self.unwrapped.iterator - window_size, 1)
-            print("Window Start: ", window_start)
             step_range = slice(window_start, self.unwrapped.iterator + 1)
 
             # Plot all series
@@ -69,10 +67,11 @@ class Model(Base):
         #self.series[serie_name] = self.series[serie_name].astype(type)
         #self.env.history[serie_name] = initial_value
 
+
     def add_point(self, serie_name, value):
         #self.env.history.at[self.env.current_date, serie_name] = value
 
         if serie_name not in self.series:
             assert ValueError("La serie nombre {} no existe.".format(serie_name))
 
-        self.series.at[self.env.current_date, serie_name] = value
+        self.series.at[self.unwrapped.current_date, serie_name] = value

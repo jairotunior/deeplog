@@ -1,8 +1,8 @@
 import gym
 import gym.spaces
 import math
-from tensor_supply.environments import SupplyEnv
-from tensor_supply.wrappers import Model
+from deeplog.environments import SupplyEnv
+from deeplog.wrappers import Model
 import pandas as pd
 import numpy as np
 

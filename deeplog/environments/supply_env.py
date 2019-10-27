@@ -5,8 +5,8 @@ import numpy as np
 from datetime import datetime, timedelta
 from gym.utils import seeding
 
-from tensor_supply.utils import get_value
-from tensor_supply.render import Chart
+from deeplog.utils import get_value
+from deeplog.render import Chart
 
 from functools import partial
 

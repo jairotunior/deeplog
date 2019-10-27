@@ -1,1 +1,0 @@
-from tensor_supply.utils.utils import get_value

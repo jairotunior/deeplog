@@ -1,10 +1,10 @@
 from distutils.core import setup
 setup(
-  name = 'TensorSupply',         # How you named your package folder (MyLib)
-  packages = ['tensorsupply'],   # Chose the same as "name"
+  name = 'DeepLog',         # How you named your package folder (MyLib)
+  packages = ['deeplog'],   # Chose the same as "name"
   version = '0.1',      # Start with a small number and increase it with every change you make
   license='MIT',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
-  description = 'TensorSupply is an open source Python framework for building, testing, training, evaluating, and deploying robust inventory models using reinforcement learning.',   # Give a short description about your library
+  description = 'DeepLog is an open source Python framework for building, testing, training, evaluating, and deploying robust inventory models using reinforcement learning.',   # Give a short description about your library
   author = 'Jairo Junior Rangel Redondo',                   # Type in your name
   author_email = 'jairotunior@gmail.com',      # Type in your E-Mail
   url = 'https://github.com/user/jairotunior',   # Provide either the link to your github or to your website

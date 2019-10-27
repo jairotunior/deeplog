@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 from abc import ABC
-from tensor_supply.utils import get_value
+from deeplog.utils import get_value
 
 from functools import partial
 

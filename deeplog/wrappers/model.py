@@ -1,10 +1,10 @@
 import gym
 import gym.spaces
-from tensor_supply.environments import SupplyEnv
+from deeplog.environments import SupplyEnv
 import pandas as pd
 import numpy as np
 
-from tensor_supply.wrappers import Base
+from deeplog.wrappers import Base
 
 from abc import ABC, abstractmethod
 

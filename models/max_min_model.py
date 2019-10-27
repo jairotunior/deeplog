@@ -1,7 +1,7 @@
 import gym
 import gym.spaces
-from tensor_supply.environments import SupplyEnv
-from tensor_supply.wrappers import Model
+from deeplog.environments import SupplyEnv
+from deeplog.wrappers import Model
 import pandas as pd
 import numpy as np
 
@@ -29,8 +29,3 @@ class MaxMinModel(Model):
             pedido = self.eoq
 
         return self.env.step([pedido])
-
-    def render(self, mode='human'):
-        self.env.render(mode=mode)
-
-        self.env.chart.history.plot(self.env.history.index.values, self.env.history['rop'].values, 'r')

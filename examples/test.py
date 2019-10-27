@@ -1,8 +1,8 @@
 import gym
 import numpy as np
 import math
-from tensor_supply.environments import SupplyEnv
-from tensor_supply.wrappers import DataSerie
+from deeplog.environments import SupplyEnv
+from deeplog.wrappers import DataSerie
 from models import EOQModel
 
 
@@ -15,8 +15,9 @@ start_date = "2017/01/01"
 end_date = "2017/12/31"
 
 lead_time = 7
+demand = 1000
 
-env = SupplyEnv(start_date=start_date, end_date=end_date, fn_demand=1000, fn_lead_time=lead_time, initial_stock=10000)
+env = SupplyEnv(start_date=start_date, end_date=end_date, fn_demand=demand, fn_lead_time=lead_time, initial_stock=10000)
 env = DataSerie(env, "Produccion", fn_demand(2000, 500))
 env = EOQModel(env)
 

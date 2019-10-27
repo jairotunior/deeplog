@@ -3,7 +3,7 @@ import numpy as np
 import math
 from deeplog.environments import SupplyEnv
 from deeplog.wrappers import DataSerie
-from models import EOQModel
+from models import EOQModel, MaxMinModel
 
 
 def fn_demand(mean, sigma):
@@ -18,8 +18,9 @@ lead_time = 7
 demand = 1000
 
 env = SupplyEnv(start_date=start_date, end_date=end_date, fn_demand=demand, fn_lead_time=lead_time, initial_stock=10000)
-env = DataSerie(env, "Produccion", fn_demand(2000, 500))
-env = EOQModel(env)
+#env = DataSerie(env, "Produccion", fn_demand(2000, 500))
+#env = EOQModel(env)
+env = MaxMinModel(env, demand, 1500, 200)
 
 obs = env.reset()
 

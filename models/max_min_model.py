@@ -8,24 +8,28 @@ import numpy as np
 
 class MaxMinModel(Model):
 
-    def __init__(self, env: SupplyEnv, costo_pedir=1000, costo_mantener=2.5):
+    def __init__(self, env: SupplyEnv, demand_prom:int, demand_max:int, demand_min:int):
         Model.__init__(self, env)
-        self.demanda_anual = 1000 * 365
 
-        self.lead_time = self.env.lead_time
-        self.min = 0
-        self.max = 10
+        self.demand_prom = demand_prom
+        self.demand_min = demand_min
+        self.demand_max = demand_max
 
-        self.rop = 0
-        self.cantidad_pedido = 0
+        self.inv_min = self.demand_min * self.lead_time
+        self.inv_max = (self.demand_max * self.lead_time) + self.inv_min
 
+        self.rop = (self.demand_prom * self.lead_time) + self.demand_min
 
         # Add serie rop
-        self.add_serie('rop', self.rop)
+        self.add_serie('ROP', 'c')
 
-    def sample(self, action):
+    def _plot_series(self):
+        self.add_point('ROP', self.rop)
+
+
+    def sample(self):
         pedido = 0
-        if self.env.get_inventory_position() <= self.rop:
-            pedido = self.eoq
+        if self.unwrapped.get_inventory_position() <= self.rop:
+            pedido = self.inv_max - self.unwrapped.get_inventory_position()
 
-        return self.env.step([pedido])
+        return [pedido]
